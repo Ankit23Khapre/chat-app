@@ -1,11 +1,25 @@
-const express=require('express');
+require("dotenv").config();
 
-const app=express();
+const mongoose=require("mongoose");
+const express = require('express');
+const app = express();
+const bodyParser=require("body-parser");
+const cors = require('cors');
 
-app.get('/',(req,res)=>res.send('Happy Diwali'));
+// Routers
+const authRoute = require('./routers/authRoute');
+const postRoute= require('./routers/postRoute');
 
-app.get('/day1',(req,res)=>res.send('Happy Dhanteras'));
+// DB Connection
+mongoose.connect(process.env.MONGODB_URI)
+    .then(()=>console.log("DB is Connected"))
+    .catch((err)=>console.log('error is '+err));
 
-const port = 5000;
+//Middlewares
+app.use(bodyParser.json());
+app.use(cors());
 
-app.listen(port,()=>console.log(`server running on port ${port}`));
+//App
+app.use("/api",[postRoute,authRoute]);
+
+app.listen(process.env.PORT,()=>console.log(`server running on port ${process.env.PORT}`));
