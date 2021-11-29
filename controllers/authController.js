@@ -1,71 +1,42 @@
-var mongoose = require('mongoose');
-const crypto = require('crypto');
-const uuidv1 = require('uuid/v1');
+const Post = require('../models/postModel');
 
-var authSchema = new mongoose.Schema(
-    {   
-        firstName:{
-            type: String,
-            required:true,
-            maxlength:32,
-            trim:true
-        },
-        lastName:{
-            type: String,
-            maxlength:32,
-            trim:true
-        },
-        email:{
-            type:String,
-            trim:true,
-            required:true,
-            unique:true
-        },
-        bio:{
-            type:String,
-            trim:true
-        },
-        encPass:{
-            type:String,
-            required:true
-        },
-        device:{
-            type:Array,
-            default:[]
-        },
-        salt:String
-    },
-    {
-        timestamps:true
-    });
+exports.insertPost=(req,res)=>{
+    const{postCaption,postLocation} = req.body;
+    const postPicture = req.file.filename;
 
-    authSchema
-        .virtual("password")
-        .set(function(password){
-                this._password = password;
-                this.salt = uuidv1();
-                this.encPass=this.securePassword(password);
-            })
-        .get(function(){
-            return this._password;
-        });
-
-    authSchema.method={
-
-        authenticate: function(plainpassword){
-            return this.securePassword(plainpassword)===this.encPass;
-        },
-
-        securePassword : function(plainpassword){
-            if(!plainpassword) return "";
-            try{
-                return crypto
-                        .createHmac('sha256',this.salt)
-                        .update(plainpassword)
-                        .digest("hex");
-                } catch (err){
-                    return "";
-                }
-        }
+    const pkg = {
+        postPicture,
+        postCaption,
+        postLocation,
     };
-module.exports=mongoose.model('auth',authSchema)
+
+    const obj = new Post(pkg);
+
+    obj.save()
+        .then((post)=>res.status(200).json({msg:"Data Saved Successfully",data:post}))
+        .catch((err)=>res.status(400).json({Err:"Error Found i.e. "+err}))
+}
+
+exports.readPost=(req,res)=>{
+    Post.find().sort({createdAt:-1})
+        .then((data)=>res.status(200).json(data))
+        .catch((err)=>res.status(400).json({Err:"Error Found i.e. "+err}))
+}
+
+exports.readPostById=(req,res)=>{
+    Post.findOne({_id:req.params.postId})
+        .then((data)=>res.status(200).json(data))
+        .catch((err)=>res.status(400).json({Err:"Error Found i.e. "+err}))
+}
+
+exports.deletePost=(req,res)=>{
+    Post.findOneAndDelete({_id:req.params.postId})
+        .then(()=>res.status(200).json({msg:"Your post deleted successfully"}))
+        .catch((err)=>res.status(400).json({Err:"Error Found i.e. "+err}))
+}
+
+exports.updatePost=(req,res)=>{
+    Post.findByIdAndUpdate({_id:req.params.postId},req.body)
+        .then((post)=>res.status(200).json({msg:"Post updated successfully",updatedFields:req.body}))
+        .catch((err)=>res.status(400).json({Err:"Error Found i.e. "+err}))
+}
