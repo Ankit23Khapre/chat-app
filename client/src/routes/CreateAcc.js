@@ -65,7 +65,7 @@ export default class CreateAcc extends Component {
                     button: "Okay",
                 });
 
-                console.log(`Err is ${err}`)
+                console.log('Err is ' + err)
             })
         }else{
             swal({

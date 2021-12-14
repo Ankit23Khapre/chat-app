@@ -1,42 +1,31 @@
-const Post = require('../models/postModel');
+const Auth = require('../models/authModel');
 
-exports.insertPost=(req,res)=>{
-    const{postCaption,postLocation} = req.body;
-    const postPicture = req.file.filename;
+exports.login = (req, res) => {
+    const { emailId, Password } = req.body;
+    Auth.findOne({ emailId })
+        .then((user) => {
+            if (!user) {
+                res.status(404).json({ err: "User not found" });
+            } else {
+                if (Password === user.Password) {
+                    res.status(200).json(user.emailId);
+                } else {
+                    res.status(400).json({ err: "Password is incorrect" });
+                }
+            }
+        })
+        .catch((err) => res.status(400).json({ err: "Error Found i.e. " + err }));
+};
 
-    const pkg = {
-        postPicture,
-        postCaption,
-        postLocation,
-    };
 
-    const obj = new Post(pkg);
-
-    obj.save()
-        .then((post)=>res.status(200).json({msg:"Data Saved Successfully",data:post}))
-        .catch((err)=>res.status(400).json({Err:"Error Found i.e. "+err}))
-}
-
-exports.readPost=(req,res)=>{
-    Post.find().sort({createdAt:-1})
+exports.readUser = (req,res)=>{
+    Auth.findOne({ emailId : req.params.email})
         .then((data)=>res.status(200).json(data))
         .catch((err)=>res.status(400).json({Err:"Error Found i.e. "+err}))
 }
 
-exports.readPostById=(req,res)=>{
-    Post.findOne({_id:req.params.postId})
+exports.allUser = (req,res)=>{
+    Auth.find()
         .then((data)=>res.status(200).json(data))
-        .catch((err)=>res.status(400).json({Err:"Error Found i.e. "+err}))
-}
-
-exports.deletePost=(req,res)=>{
-    Post.findOneAndDelete({_id:req.params.postId})
-        .then(()=>res.status(200).json({msg:"Your post deleted successfully"}))
-        .catch((err)=>res.status(400).json({Err:"Error Found i.e. "+err}))
-}
-
-exports.updatePost=(req,res)=>{
-    Post.findByIdAndUpdate({_id:req.params.postId},req.body)
-        .then((post)=>res.status(200).json({msg:"Post updated successfully",updatedFields:req.body}))
         .catch((err)=>res.status(400).json({Err:"Error Found i.e. "+err}))
 }

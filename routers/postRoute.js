@@ -4,7 +4,7 @@ var router=express.Router();
 
 const Post = require('../models/postModel');
 
-const {readPost,readPostById,deletePost,updatePost} = require('../controllers/postController');
+const {insertPost,readPost,readPostById,deletePost,updatePost} = require('../controllers/postController');
 
 // File Uploading
 const multer = require('multer');
@@ -25,13 +25,14 @@ let upload = multer({storage});
 // this route will post data to the db
 
 router.route("/insert").post(upload.single('postPicture'),(req,res)=>{
-    const{postCaption,postLocation} = req.body;
+    const{postCaption,postLocation,postBelongsTo} = req.body;
     const postPicture = req.file.filename;
 
     const pkg = {
         postPicture,
         postCaption,
         postLocation,
+        postBelongsTo
     };
 
     const obj = new Post(pkg);

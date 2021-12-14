@@ -11,7 +11,7 @@ export default function Home(){
           <div className="row">
             <div className="col">
               <div className="card mt-2 cardSize">
-                <img src={Logo} className="card-img-top" alt="..." />
+                <img src={Logo} className="card-img" alt="..." />
                 <div className="card-body">
                   <h4 className="test text-center mt-0">Welcome To Chat App</h4>
                   
